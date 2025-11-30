@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
-systemctl daemon-reload
-systemctl start app
-systemctl restart nginx
+sudo systemctl daemon-reload
+sudo systemctl start app
+sudo systemctl restart nginx
