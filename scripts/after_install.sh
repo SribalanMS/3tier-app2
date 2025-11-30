@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 cd /opt/app
-npm install --production
+sudo npm install --production
