@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
-systemctl stop app || true
-systemctl stop nginx || true
+chmod +x /opt/app/scripts/*.sh
+sudo systemctl stop app || true
+sudo systemctl stop nginx || true
