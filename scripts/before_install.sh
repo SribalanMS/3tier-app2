@@ -1,9 +1,12 @@
 #!/bin/bash
+set -xe
 
-set -e
-chmod +x /opt/app/scripts/*.sh || true
+# Stop services before deployment
 sudo systemctl stop app || true
 sudo systemctl stop nginx || true
-cd /opt/
-sudo rm -rf app
 
+# Clean old app files but keep node_modules if present
+cd /opt/
+if [ -d "app" ]; then
+  sudo rm -rf app/*
+fi
