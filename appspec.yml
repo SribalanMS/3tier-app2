@@ -1,6 +1,8 @@
 version: 0.0
 os: linux
 files:
+  - source: scripts/
+    destination: /opt/app/scripts/
   - source: backend/
     destination: /opt/app
   - source: frontend/
@@ -22,3 +24,4 @@ hooks:
     - location: scripts/validate.sh
       timeout: 300
       runas: root
+
