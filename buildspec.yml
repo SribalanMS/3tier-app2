@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - npm install --prefix backend
+  build:
+    commands:
+      - echo Build started on `date`
+      - npm run build --prefix backend
+
+artifacts:
+  files:
+    - appspec.yml
+    - backend/**/*
+    - frontend/**/*
+    - scripts/**/*
