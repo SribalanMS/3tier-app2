@@ -1,0 +1,10 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Static frontend for Three-Tier CRUD Mallaya",
+  "private": true,
+  "scripts": {
+    "build": "echo 'No build step required for static HTML/JS frontend'"
+  },
+  "dependencies": {}
+}
