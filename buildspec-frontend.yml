@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing frontend dependencies...
+      - npm install --prefix frontend
+  build:
+    commands:
+      - echo Build frontend started on `date`
+      - npm run build --prefix frontend
+
+artifacts:
+  files:
+    - appspec-frontend.yml
+    - frontend/**/*
+    - scripts/reload_nginx.sh
