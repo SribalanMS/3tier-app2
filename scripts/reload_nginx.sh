@@ -1,9 +1,14 @@
+
 #!/bin/bash
 set -xe
 
-# Reload nginx to pick up new frontend files
-if systemctl list-unit-files | grep -q nginx.service; then
-  sudo systemctl reload nginx
+if systemctl list-unit-files | grep -q "^nginx.service"; then
+  echo "Ensuring nginx is running..."
+  if ! systemctl is-active --quiet nginx; then
+    sudo systemctl start nginx
+  fi
+  echo "Reloading nginx..."
+  sudo systemctl reload nginx || sudo systemctl restart nginx
 else
-  echo "nginx service not found, skipping reload"
+  echo "nginx not installed, skipping"
 fi
