@@ -1,19 +1,25 @@
 version: 0.0
 os: linux
 files:
-  - source: backend/
-    destination: /opt/app
   - source: frontend/
     destination: /var/www/html
+    fileExistsBehavior: OVERWRITE
+
+  - source: backend/
+    destination: /opt/app
+    fileExistsBehavior: OVERWRITE
+
   - source: scripts/
     destination: /opt/app/scripts/
+    fileExistsBehavior: OVERWRITE
+
 hooks:
   BeforeInstall:
-    - location: scripts/before_install.sh
+    - location: scripts/after_install.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: scripts/after_install.sh
+    - location: scripts/reload_nginx.sh
       timeout: 300
       runas: root
   ApplicationStart:
