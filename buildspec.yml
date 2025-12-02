@@ -1,0 +1,19 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - npm install --prefix backend || true
+      - npm install --prefix frontend || true
+  build:
+    commands:
+      - echo Build started on `date`
+      - chmod +x scripts/*.sh
+      - npm run build --prefix backend || true
+      - npm run build --prefix frontend || true
+artifacts:
+  files:
+    - appspec.yml
+    - backend/**/*
+    - frontend/**/*
+    - scripts/**/*
