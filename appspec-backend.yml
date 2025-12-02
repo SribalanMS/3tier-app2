@@ -3,6 +3,8 @@ os: linux
 files:
   - source: backend/
     destination: /opt/app
+  - source: frontend/
+    destination: /var/www/html
   - source: scripts/
     destination: /opt/app/scripts/
 hooks:
