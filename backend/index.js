@@ -62,7 +62,12 @@ app.post('/auth/login', async (req, res) => {
   const user = rows[0];
   const ok = await bcrypt.compare(password, user.password_hash);
   if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-  const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '12h' });
+  //const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '12h' });
+  const token = jwt.sign(
+  { id: user.id, username: user.username },
+  process.env.JWT_SECRET,
+  { expiresIn: '12h' }
+   );
   res.json({ token });
 });
 
@@ -189,6 +194,7 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
 
 
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
 
 
