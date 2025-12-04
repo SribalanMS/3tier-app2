@@ -1,4 +1,9 @@
-require('dd-trace').init();
+// Initialize Datadog tracer first
+require('dd-trace').init({
+  env: 'production',       // environment tag (shows up in Datadog)
+  service: 'node-app',     // service name in Datadog APM
+  version: '1.0.0'         // optional version tag
+});
 const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -166,5 +171,6 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
 
