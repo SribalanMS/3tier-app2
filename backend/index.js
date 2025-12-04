@@ -12,6 +12,8 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
+const PORT = process.env.PORT || 3000;
+
 
 const AWS = require('aws-sdk');
 // const mysql = require('mysql2/promise');
@@ -184,7 +186,10 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
   res.status(204).end();
 });
 
+
+
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
 
 
