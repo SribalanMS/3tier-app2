@@ -10,18 +10,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 // test
 
-const app = express();
-app.use(express.json());
-
 const AWS = require('aws-sdk');
 // const mysql = require('mysql2/promise');
 
-const { DB_SECRET_NAME, AWS_REGION, JWT_SECRET, PORT = 3000 } = process.env;
-
-const secretsManager = new AWS.SecretsManager({ region: AWS_REGION });
+const secretsManager = new AWS.SecretsManager({ region: process.env.AWS_REGION });
 
 async function getDbCredentials() {
-  const secret = await secretsManager.getSecretValue({ SecretId: DB_SECRET_NAME }).promise();
+  const secret = await secretsManager.getSecretValue({ SecretId: process.env.DB_SECRET_NAME }).promise();
   return JSON.parse(secret.SecretString);
 }
 
@@ -34,10 +29,7 @@ let pool;
     user: creds.username,
     password: creds.password,
     database: creds.dbname,
-    ssl: 'Amazon RDS',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    ssl: 'Amazon RDS'
   });
 })();
 
@@ -190,6 +182,7 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
 
 
