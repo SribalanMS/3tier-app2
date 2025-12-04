@@ -1,3 +1,4 @@
+require('dd-trace').init();
 const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -165,4 +166,5 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
