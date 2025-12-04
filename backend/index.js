@@ -1,57 +1,76 @@
 // Initialize Datadog tracer first
 require('dd-trace').init({
-  env: 'production',       // environment tag (shows up in Datadog)
-  service: 'node-app',     // service name in Datadog APM
-  version: '1.0.0'         // optional version tag
+  env: 'production',
+  service: 'node-app',
+  version: '1.0.0'
 });
+
 const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// test
+const AWS = require('aws-sdk');
 
 const app = express();
 app.use(express.json());
+
 const PORT = process.env.PORT || 3000;
 
-
-const AWS = require('aws-sdk');
-// const mysql = require('mysql2/promise');
-
+// AWS Secrets Manager client
 const secretsManager = new AWS.SecretsManager({ region: process.env.AWS_REGION });
 
+// Load DB credentials from Secrets Manager
 async function getDbCredentials() {
   const secret = await secretsManager.getSecretValue({ SecretId: process.env.DB_SECRET_NAME }).promise();
   return JSON.parse(secret.SecretString);
 }
 
 let pool;
-(async () => {
-  const creds = await getDbCredentials();
-  pool = mysql.createPool({
-    host: creds.host,
-    port: creds.port,
-    user: creds.username,
-    password: creds.password,
-    database: creds.dbname,
-    ssl: 'Amazon RDS'
-  });
-})();
 
+// Initialize DB pool before starting server
+(async () => {
+  try {
+    const creds = await getDbCredentials();
+    pool = mysql.createPool({
+      host: creds.host,
+      port: creds.port,
+      user: creds.username,
+      password: creds.password,
+      database: creds.dbname,   // ensure dbname exists in your secret JSON
+      ssl: 'Amazon RDS',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
+
+    app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+  } catch (err) {
+    console.error('Failed to initialize DB pool:', err);
+    process.exit(1);
+  }
+})();
 
 // Auth middleware
 function auth(req, res, next) {
   const h = req.headers.authorization || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'unauthorized' });
-  try { req.user = jwt.verify(token, JWT_SECRET); next(); }
-  catch { return res.status(401).json({ error: 'unauthorized' }); }
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
 }
 
 // Health check
 app.get('/health', async (req, res) => {
-  try { await pool.query('SELECT 1'); res.json({ status: 'ok' }); }
-  catch (e) { res.status(500).json({ status: 'error', message: e.message }); }
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ok' });
+  } catch (e) {
+    res.status(500).json({ status: 'error', message: e.message });
+  }
 });
 
 // Auth login
@@ -62,12 +81,12 @@ app.post('/auth/login', async (req, res) => {
   const user = rows[0];
   const ok = await bcrypt.compare(password, user.password_hash);
   if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-  //const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '12h' });
+
   const token = jwt.sign(
-  { id: user.id, username: user.username },
-  process.env.JWT_SECRET,
-  { expiresIn: '12h' }
-   );
+    { id: user.id, username: user.username },
+    process.env.JWT_SECRET,
+    { expiresIn: '12h' }
+  );
   res.json({ token });
 });
 
@@ -190,16 +209,3 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
   if (!r.affectedRows) return res.status(404).json({ error: 'not found' });
   res.status(204).end();
 });
-
-
-
-app.listen(PORT, () => console.log(`App listening on ${PORT}`));
-
-
-
-
-
-
-
-
-
