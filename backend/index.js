@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 const AWS = require('aws-sdk');
-#const mysql = require('mysql2/promise');
+// const mysql = require('mysql2/promise');
 
 const { DB_SECRET_NAME, AWS_REGION, JWT_SECRET, PORT = 3000 } = process.env;
 
@@ -190,6 +190,7 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
 
 
