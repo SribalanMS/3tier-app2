@@ -13,15 +13,34 @@ const jwt = require('jsonwebtoken');
 const app = express();
 app.use(express.json());
 
-const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, JWT_SECRET, PORT = 3000 } = process.env;
+const AWS = require('aws-sdk');
+#const mysql = require('mysql2/promise');
+
+const { DB_SECRET_NAME, AWS_REGION, JWT_SECRET, PORT = 3000 } = process.env;
+
+const secretsManager = new AWS.SecretsManager({ region: AWS_REGION });
+
+async function getDbCredentials() {
+  const secret = await secretsManager.getSecretValue({ SecretId: DB_SECRET_NAME }).promise();
+  return JSON.parse(secret.SecretString);
+}
 
 let pool;
 (async () => {
+  const creds = await getDbCredentials();
   pool = mysql.createPool({
-    host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD, database: DB_NAME,
-    waitForConnections: true, connectionLimit: 10, queueLimit: 0
+    host: creds.host,
+    port: creds.port,
+    user: creds.username,
+    password: creds.password,
+    database: creds.dbname,
+    ssl: 'Amazon RDS',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
   });
 })();
+
 
 // Auth middleware
 function auth(req, res, next) {
@@ -171,6 +190,7 @@ app.delete('/api/transaction/:id', auth, async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`App listening on ${PORT}`));
+
 
 
 
